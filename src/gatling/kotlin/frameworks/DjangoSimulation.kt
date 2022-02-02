@@ -7,7 +7,7 @@ class DjangoSimulation : Simulation() {
 
     init {
         setUp(
-            scenario("Django").injectOpen(atOnceUsers(2))
+            scenario("Django").injectOpen(atOnceUsers(1))
                 .protocols(httpProtocol.baseUrl("https://django.karpiniak.pl/api"))
         )
     }

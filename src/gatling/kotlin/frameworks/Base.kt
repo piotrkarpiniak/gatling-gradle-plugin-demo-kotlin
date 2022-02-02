@@ -1,8 +1,16 @@
 package frameworks
 
 import io.gatling.javaapi.core.CoreDsl
+import io.gatling.javaapi.core.CoreDsl.StringBody
 import io.gatling.javaapi.http.HttpDsl
 import io.gatling.javaapi.http.HttpDsl.http
+import org.apache.commons.lang3.RandomStringUtils
+
+val articleFeeder = generateSequence {
+    val tag = RandomStringUtils.randomAlphanumeric(20)
+    val description = RandomStringUtils.randomAlphanumeric(100)
+    mapOf("title" to "title $tag", "tag" to tag, "description" to description)
+}.iterator()
 
 
 val httpProtocol = http
@@ -22,28 +30,30 @@ private val user = """
 }"""
 
 private val article =
-    """{    "article": {        "title": "How to train your dragon",        "description": "Ever wonder how?",        "body": "Very carefully.",        "tagList": [            "training",            "dragons"        ]    }}"""
+    """{"article":{"title":"#{title}","description":"#{description}","body":"#{description}","tagList":["#{tag}"]}}""".trimMargin()
 
 
 fun scenario(name: String) = CoreDsl.scenario(name)
+    .feed(articleFeeder)
     .exec(
         http("login")
             .post("/users/login")
-            .body(CoreDsl.StringBody(user))
+            .body(StringBody(user))
             .check(CoreDsl.jsonPath("$.user.token").saveAs("access_token"))
             .check(HttpDsl.status().shouldBe(200))
+
     )
-    .repeat(10).on(
+    .repeat(100).on(
         CoreDsl.exec(
             http("create article")
                 .post("/articles")
                 .header("content-type", "application/json")
                 .header("Authorization", "Token #{access_token}")
-                .body(CoreDsl.StringBody(article))
+                .body(StringBody(article))
                 .check(HttpDsl.status().shouldBe(201))
             //.check(bodyString().saveAs("BODY"))
         )
-        /*.exec { session ->
+/*        .exec { session ->
             println("Response body: ${session.get<String>("BODY")}")
             session
         }*/

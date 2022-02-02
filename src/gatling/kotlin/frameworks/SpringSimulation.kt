@@ -9,7 +9,7 @@ class SpringSimulation : Simulation() {
 
     init {
         setUp(
-            scenario("Spring").injectOpen(atOnceUsers(2))
+            scenario("Spring").injectOpen(atOnceUsers(1))
                 .protocols(httpProtocol.baseUrl("https://spring.karpiniak.pl"))
         )
     }
