@@ -51,10 +51,14 @@ fun scenario(name: String) = CoreDsl.scenario(name)
                 .header("Authorization", "Token #{access_token}")
                 .body(StringBody(article))
                 .check(HttpDsl.status().shouldBe(201))
-            //.check(bodyString().saveAs("BODY"))
         )
-/*        .exec { session ->
-            println("Response body: ${session.get<String>("BODY")}")
-            session
-        }*/
+    )
+    .repeat(100).on(
+        CoreDsl.exec(
+            http("articles by tag")
+                .get("/articles?tag=dragons")
+                .header("Authorization", "Token #{access_token}")
+                .check(HttpDsl.status().shouldBe(200))
+
+        )
     )
